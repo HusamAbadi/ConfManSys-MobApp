@@ -1,1 +1,0 @@
- E:\\University\\Internships\\Peter\ Ivany\ Internship\\Task\ 3\ -\ Mobile\ App\\Application\ -\ Conference\ Management\ System\\conference_management_system\\.dart_tool\\flutter_build\\209b39a9673ff323d3ce5bb298bd925b\\native_assets.yaml: 
