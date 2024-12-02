@@ -19,7 +19,7 @@ class SessionsScreen extends StatelessWidget {
     required this.dayIncrement,
   });
 
-  @override 
+  @override
   Widget build(BuildContext context) {
     debugPrint('Building SessionsScreen');
     debugPrint('Conference ID: ${conference.id}');
@@ -85,9 +85,9 @@ class SessionsScreen extends StatelessWidget {
                 );
               }
               return SessionsList(
-                sessions: sessions,
                 conference: conference,
                 day: day,
+                sessions: sessions,
                 dayIncrement: dayIncrement,
               );
             },

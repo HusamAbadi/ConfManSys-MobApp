@@ -87,9 +87,9 @@ class PapersScreen extends StatelessWidget {
   }
 
   Widget _buildPapersScreen({
+    required String appBarTitle,
     required String title,
     required Future<List<Paper>?> Function() fetchPapers,
-    required String appBarTitle,
   }) {
     return FutureProvider<List<Paper>?>(
       create: (context) => fetchPapers(),
@@ -121,7 +121,11 @@ class PapersScreen extends StatelessWidget {
                   if (papers.isEmpty) {
                     return const Center(child: Text('No papers available.'));
                   }
-                  return PapersList(papers: papers);
+                  if (session == null) {
+                    return PapersList(papers: papers, sessionId: 0.toString());
+                  } else {
+                    return PapersList(papers: papers, sessionId: session!.id);
+                  }
                 },
               ),
             ),

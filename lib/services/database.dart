@@ -131,6 +131,30 @@ class DatabaseService {
     }
   }
 
+  Future<void> addFavoritePaper(String paperId) async {
+    try {
+      final userDoc = usersCollection
+          .doc(uid); // Assuming 'uid' is the user's unique identifier
+
+      // Get the current list of favorite papers
+      DocumentSnapshot userSnapshot = await userDoc.get();
+      List<dynamic> favoritePapers =
+          (userSnapshot.data() as Map<String, dynamic>)['favoritePapers'] ?? [];
+
+      // Add the paperId if it's not already in the list
+      if (!favoritePapers.contains(paperId)) {
+        favoritePapers.add(paperId);
+
+        // Update the user's document with the new favorite papers list
+        await userDoc.update({
+          'favoritePapers': favoritePapers,
+        });
+      }
+    } catch (e) {
+      print("Error adding favorite paper: $e");
+    }
+  }
+
   Future<List<Paper>> fetchPapersByAuthor(String authorId) async {
     List<Paper> papers = [];
     QuerySnapshot querySnapshot =

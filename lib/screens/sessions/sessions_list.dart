@@ -5,8 +5,8 @@ import 'package:conference_management_system/screens/sessions/session_tile.dart'
 import 'package:flutter/material.dart';
 
 class SessionsList extends StatelessWidget {
-  final Day? day;
   final Conference conference;
+  final Day? day;
   final List<Session> sessions;
   final int dayIncrement;
 

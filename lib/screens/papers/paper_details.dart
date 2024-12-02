@@ -3,13 +3,15 @@ import 'package:conference_management_system/models/paper.dart';
 import 'package:conference_management_system/models/person.dart';
 import 'package:conference_management_system/services/database.dart';
 import 'package:conference_management_system/shared/constants.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class PaperDetails extends StatelessWidget {
   final Paper paper;
+  final String sessionId;
 
-  const PaperDetails({super.key, required this.paper});
+  const PaperDetails({super.key, required this.paper, required this.sessionId});
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +49,12 @@ class PaperDetails extends StatelessWidget {
                     ),
                   ),
                 ),
+                // ElevatedButton(
+                //   onPressed: () {
+                //     _saveAsFavorite(context);
+                //   },
+                //   child: Text("Save as Favorite"),
+                // ),
                 // Abstract
                 _buildAbstractSection(),
                 SizedBox(height: 20.0),
@@ -140,7 +148,7 @@ class PaperDetails extends StatelessWidget {
 
   Widget _buildAbstractSection() {
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 550.0),
+      constraints: const BoxConstraints(maxHeight: 500.0),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.grey[300],
@@ -159,4 +167,19 @@ class PaperDetails extends StatelessWidget {
       ),
     );
   }
+
+  // void _saveAsFavorite(BuildContext context) async {
+  //   final user = Provider.of<User?>(context,
+  //       listen: false); // Assuming the user is available through Provider
+  //   if (user != null) {
+  //     await DatabaseService(uid: user.uid).addFavoritePaper(paper.id);
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Paper saved as favorite!')),
+  //     );
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Please log in to save favorites.')),
+  //     );
+  //   }
+  // }
 }

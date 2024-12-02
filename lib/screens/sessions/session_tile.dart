@@ -25,14 +25,19 @@ class SessionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     DateTime now = DateTime.now();
 
+    String formattedStartTime = DateFormat('hh:mm a').format(session.startTime);
+    String formattedEndTime = DateFormat('hh:mm a').format(session.endTime);
+
     if (session.isBreak) {
       // Design for break sessions
       return Card(
-          margin: const EdgeInsets.fromLTRB(20.0, 6.0, 20.0, 0.0),
-          color: Colors.lightGreen[200],
-          child: ListTile(
+        margin: const EdgeInsets.fromLTRB(20.0, 6.0, 20.0, 0.0),
+        color: Colors.lightGreen[200],
+        child: Stack(
+          children: [
+            ListTile(
               leading: const Icon(
-                Icons.coffee,
+                Icons.access_time_sharp,
                 color: Colors.brown,
                 size: 30.0,
               ),
@@ -43,9 +48,14 @@ class SessionTile extends StatelessWidget {
                   fontSize: 18.0,
                 ),
               ),
-              subtitle: Text(
-                "Location: ${session.location}",
-                style: const TextStyle(fontStyle: FontStyle.italic),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(session.location),
+                  // const SizedBox(height: 8.0),
+                  // Text("Start Time: $formattedStartTime"),
+                  // Text("End Time: $formattedEndTime"),
+                ],
               ),
               onTap: () {
                 // Show the description in a popup
@@ -66,21 +76,47 @@ class SessionTile extends StatelessWidget {
                     );
                   },
                 );
-              }));
+              },
+            ),
+            // Start Time Positioned at top-right
+            Positioned(
+              top: 8.0,
+              right: 8.0,
+              child: Text(
+                formattedStartTime,
+                style: const TextStyle(
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            // End Time Positioned at bottom-right
+            Positioned(
+              bottom: 8.0,
+              right: 8.0,
+              child: Text(
+                formattedEndTime,
+                style: const TextStyle(
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
     } else {
       // Regular session design
-      Color circleColor;
+      Color cardBorderColor;
       if (now.isBefore(session.startTime)) {
-        circleColor = Colors.orange; // Session is upcoming
+        cardBorderColor = Colors.orange; // Session is upcoming
       } else if (now.isAfter(session.endTime)) {
-        circleColor = Colors.red; // Session has ended
+        cardBorderColor = Colors.red; // Session has ended
       } else {
-        circleColor = Colors.green; // Session is ongoing
+        cardBorderColor = Colors.green; // Session is ongoing
       }
-
-      String formattedStartTime =
-          DateFormat('hh:mm a').format(session.startTime);
-      String formattedEndTime = DateFormat('hh:mm a').format(session.endTime);
 
       return FutureProvider<List<Person>?>(
         create: (context) =>
@@ -88,56 +124,111 @@ class SessionTile extends StatelessWidget {
         initialData: null,
         child: Card(
           margin: const EdgeInsets.fromLTRB(20.0, 6.0, 20.0, 0.0),
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: cardBorderColor, width: 2.0),
+            borderRadius:
+                BorderRadius.circular(12.0), // Adjust the radius as needed
+          ),
           child: Column(
             children: [
-              ListTile(
-                leading: CircleAvatar(
-                  radius: 25.0,
-                  backgroundColor:
-                      circleColor, // Set the color based on the status
-                ),
-                title: Text(
-                  session.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('$formattedStartTime - $formattedEndTime'),
-                    Text(session.location),
-                    const SizedBox(height: 8.0),
-                    Consumer<List<Person>?>(
-                        builder: (context, chairPersons, child) {
-                      if (chairPersons == null) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (chairPersons.isEmpty) {
-                        return const Center(
-                            child: Text('No chairpersons found.'));
-                      }
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: chairPersons.map((chairPerson) {
-                          return Text(
-                            chairPerson.name,
-                            style: const TextStyle(color: Colors.lightBlue),
-                          );
-                        }).toList(),
-                      );
-                    }),
-                  ],
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PapersScreen.session(
-                          session: session,
-                          conference: conference,
-                          dayIncrement: dayIncrement,
-                          sessionIncrement: sessionIncrement),
+              Stack(
+                children: [
+                  ListTile(
+                    leading: const Icon(
+                      Icons.sensors_outlined,
+                      color: Colors.blue,
                     ),
-                  );
-                },
+                    title: Text(
+                      session.title,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(session.location),
+                        // const SizedBox(height: 8.0),
+                        Consumer<List<Person>?>(
+                            builder: (context, chairPersons, child) {
+                          if (chairPersons == null) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else if (chairPersons.isEmpty) {
+                            return const Center(
+                                child: Text('No chairpersons found.'));
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Chaired by: ",
+                                style: TextStyle(
+                                    color: Colors
+                                        .black), // Normal text stays black
+                              ),
+                              // SingleChildScrollView to make the row scrollable horizontally
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: chairPersons.map((chairPerson) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                          right: 8.0), // Space between names
+                                      child: Text(
+                                        chairPerson.name,
+                                        style: const TextStyle(
+                                            color: Colors
+                                                .lightBlue), // Chairpersons' names in light blue
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                          );
+                        }),
+                      ],
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PapersScreen.session(
+                              session: session,
+                              conference: conference,
+                              dayIncrement: dayIncrement,
+                              sessionIncrement: sessionIncrement),
+                        ),
+                      );
+                    },
+                  ),
+                  // Start Time Positioned at top-right
+                  Positioned(
+                    top: 8.0,
+                    right: 8.0,
+                    child: Text(
+                      formattedStartTime,
+                      style: const TextStyle(
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  // End Time Positioned at bottom-right
+                  Positioned(
+                    bottom: 8.0,
+                    right: 8.0,
+                    child: Text(
+                      formattedEndTime,
+                      style: const TextStyle(
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
