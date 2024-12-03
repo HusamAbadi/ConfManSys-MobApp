@@ -43,17 +43,31 @@ class PaperTile extends StatelessWidget {
   }
 
   Future<void> _saveAsFavorite(BuildContext context) async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${paper.title} saved as favorite!'),
-      ),
-    );
+    try {
+      // Get the current user's ID
+      final user = FirebaseAuth.instance.currentUser;
 
-    final user = Provider.of<User?>(context,
-        listen: false); // Assuming the user is available through Provider
-    await DatabaseService(uid: user!.uid).addFavoritePaper(paper.id);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Paper saved as favorite!')),
-    );
+      final uid = user!.uid;
+
+      // Access the DatabaseService
+      final database = DatabaseService(uid: uid);
+
+      // Add the paper to the user's favorite papers
+      await database.addFavoritePaper(paper.id);
+
+      // Show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${paper.title} saved as favorite!'),
+        ),
+      );
+    } catch (e) {
+      // Show an error message in case of failure
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save favorite: $e'),
+        ),
+      );
+    }
   }
 }
