@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:conference_management_system/models/user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -39,21 +40,26 @@ class AuthService {
           email: email, password: password);
       AppUser? user = _userFromFirebaseUser(result.user);
 
-      // If you want to save additional user data to Firestore after registration
+      // Call to create user document in Firestore
       if (user != null) {
-        await _createUserInDatabase(
-            user.id); // Call to method that creates a user in the database
+        await _createUserInDatabase(user.id);
       }
 
       return user;
     } catch (e) {
-      return null; // Consider returning specific error messages
+      print("Error registering user: $e");
+      return null; // Optionally, return a specific error
     }
   }
 
   Future<void> _createUserInDatabase(String uid) async {
-    // Example of adding user data to Firestore
-    // await DatabaseService(uid: uid).addUserData({ 'favoritePapers': [] });
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'favoritePapers': [],
+      });
+    } catch (e) {
+      print("Error creating user document: $e");
+    }
   }
 
   Future<void> signOut() async {

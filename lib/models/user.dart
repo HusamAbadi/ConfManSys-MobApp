@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AppUser {
   final String id;
-  final List<DocumentReference> favoritePapers; // References to favorite papers
+  final List<String> favoritePapers; // References to favorite papers
 
   AppUser({
     required this.id,
@@ -14,8 +14,7 @@ class AppUser {
     final data = doc.data() as Map<String, dynamic>;
     return AppUser(
       id: doc.id,
-      favoritePapers:
-          List<DocumentReference>.from(data['favoritePapers'] ?? []),
+      favoritePapers: List<String>.from(data['favoritePapers'] ?? []),
     );
   }
 }

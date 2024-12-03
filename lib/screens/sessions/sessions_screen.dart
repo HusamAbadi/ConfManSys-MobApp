@@ -21,9 +21,6 @@ class SessionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('Building SessionsScreen');
-    debugPrint('Conference ID: ${conference.id}');
-    debugPrint('Day ID: ${day.id}');
 
     return FutureProvider<List<Session>?>(
       create: (context) {

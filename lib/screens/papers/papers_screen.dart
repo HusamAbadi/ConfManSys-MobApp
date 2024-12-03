@@ -122,7 +122,10 @@ class PapersScreen extends StatelessWidget {
                     return const Center(child: Text('No papers available.'));
                   }
                   if (session == null) {
-                    return PapersList(papers: papers, sessionId: 0.toString());
+                    return PapersList(
+                      papers: papers,
+                      sessionId: session?.id.toString() ?? "0",
+                    );
                   } else {
                     return PapersList(papers: papers, sessionId: session!.id);
                   }
