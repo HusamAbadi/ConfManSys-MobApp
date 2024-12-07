@@ -17,13 +17,20 @@ class Keyword {
       final data = doc.data() as Map<String, dynamic>;
       print('Parsing keyword document ${doc.id}: ${data.toString()}'); // Debug log
       
-      // Handle papers array - filter out null values
+      // Handle papers array - filter out null values and log the process
       List<String> papersList = [];
       if (data['papers'] != null) {
-        papersList = (data['papers'] as List)
+        final rawPapers = data['papers'] as List;
+        print('Raw papers for keyword ${doc.id}: $rawPapers'); // Debug log
+        
+        papersList = rawPapers
             .where((item) => item != null)  // Filter out null values
             .map((item) => item.toString()) // Convert to String
             .toList();
+            
+        print('Processed papers for keyword ${doc.id}: $papersList'); // Debug log
+      } else {
+        print('No papers array found for keyword ${doc.id}'); // Debug log
       }
 
       return Keyword(
