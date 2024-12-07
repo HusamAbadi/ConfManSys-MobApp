@@ -2,12 +2,12 @@
   "project_info": {
     "project_number": "1033310671849",
     "project_id": "conference-management-sy-1c91e",
-    "storage_bucket": "conference-management-sy-1c91e.appspot.com"
+    "storage_bucket": "conference-management-sy-1c91e.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1033310671849:android:1cbcdb4551e1cc66faf178",
+        "mobilesdk_app_id": "1:1033310671849:android:7973e4bd50f3edd0faf178",
         "android_client_info": {
           "package_name": "com.example.conference_management_system"
         }
