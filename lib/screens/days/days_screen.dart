@@ -31,9 +31,18 @@ class DaysScreen extends StatelessWidget {
             children: [
               const SizedBox(height: 20.0),
               Center(
-                child: Text(
-                  conference.name,
-                  style: titleFontStyle.copyWith(fontWeight: FontWeight.bold),
+                child: Column(
+                  children: [
+                    Text(
+                      conference.name,
+                      style:
+                          titleFontStyle.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      conference.location,
+                      style: const TextStyle(fontSize: 18),
+                    )
+                  ],
                 ),
               ),
               const SizedBox(height: 30.0),

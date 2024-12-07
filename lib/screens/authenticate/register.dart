@@ -19,6 +19,7 @@ class _RegisterState extends State<Register> {
 
   String email = '';
   String password = '';
+  String username = '';
   String error = '';
 
   @override
@@ -49,86 +50,76 @@ class _RegisterState extends State<Register> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
+                    TextFormField(
+                      decoration: textInputDecoration.copyWith(
+                        labelText: 'Username',
+                        prefixIcon: const Icon(Icons.person_outline),
+                      ),
+                      validator: (val) =>
+                          val!.isEmpty ? 'Enter a username' : null,
+                      onChanged: (val) {
+                        setState(() => username = val);
+                      },
+                    ),
                     const SizedBox(height: 20.0),
-                    _buildEmailField(),
+                    TextFormField(
+                      decoration: textInputDecoration.copyWith(
+                        labelText: 'Email',
+                        prefixIcon: const Icon(Icons.email_outlined),
+                      ),
+                      validator: (val) =>
+                          val!.isEmpty ? 'Enter an email' : null,
+                      onChanged: (val) {
+                        setState(() => email = val);
+                      },
+                    ),
                     const SizedBox(height: 20.0),
-                    _buildPasswordField(),
+                    TextFormField(
+                      decoration: textInputDecoration.copyWith(
+                        labelText: 'Password',
+                        prefixIcon: const Icon(Icons.lock_outline),
+                      ),
+                      obscureText: true,
+                      validator: (val) => val!.length < 6
+                          ? 'Enter a password 6+ chars long'
+                          : null,
+                      onChanged: (val) {
+                        setState(() => password = val);
+                      },
+                    ),
                     const SizedBox(height: 20.0),
-                    _buildRegisterButton(),
+                    ElevatedButton(
+                      child: const Text(
+                        'Register',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          setState(() => loading = true);
+                          dynamic result =
+                              await _auth.registerWithEmailAndPassword(
+                            email,
+                            password,
+                            username,
+                          );
+                          if (result == null) {
+                            setState(() {
+                              error = 'Please supply a valid email';
+                              loading = false;
+                            });
+                          }
+                        }
+                      },
+                    ),
                     const SizedBox(height: 12.0),
-                    _buildErrorText(),
+                    Text(
+                      error,
+                      style: const TextStyle(color: Colors.red, fontSize: 14.0),
+                    ),
                   ],
                 ),
               ),
             ),
           );
-  }
-
-  Widget _buildEmailField() {
-    return TextFormField(
-      decoration: textInputDecoration.copyWith(hintText: 'Email'),
-      validator: (val) {
-        if (val == null || val.isEmpty) {
-          return 'Enter an email';
-        }
-        if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(val)) {
-          return 'Enter a valid email';
-        }
-        return null; // Return null if validation passes
-      },
-      onChanged: (val) {
-        setState(() => email = val.trim());
-      },
-    );
-  }
-
-  Widget _buildPasswordField() {
-    return TextFormField(
-      decoration: textInputDecoration.copyWith(hintText: 'Password'),
-      obscureText: true,
-      validator: (val) {
-        if (val == null || val.length < 6) {
-          return 'Minimum 6 characters';
-        }
-        return null; // Return null if validation passes
-      },
-      onChanged: (val) {
-        setState(() => password = val);
-      },
-    );
-  }
-
-  Widget _buildRegisterButton() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.lightBlue[200],
-      ),
-      child: const Text(
-        'Register',
-        style: TextStyle(color: Colors.white),
-      ),
-      onPressed: () async {
-        if (_formKey.currentState?.validate() ?? false) {
-          setState(() => loading = true);
-          dynamic result =
-              await _auth.registerWithEmailAndPassword(email, password);
-          if (result == null) {
-            setState(() {
-              error = 'Please supply a valid email';
-              loading = false;
-            });
-          } else {
-            // Optional: Navigate to the next screen or show success
-          }
-        }
-      },
-    );
-  }
-
-  Widget _buildErrorText() {
-    return Text(
-      error,
-      style: const TextStyle(color: Colors.red, fontSize: 14.0),
-    );
   }
 }

@@ -4,11 +4,15 @@ import 'package:conference_management_system/screens/keywords/keywords_screen.da
 import 'package:conference_management_system/services/auth.dart';
 import 'package:conference_management_system/shared/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Home extends StatelessWidget {
   Home({super.key});
 
   final AuthService _auth = AuthService();
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Define a list of button titles and their respective screens
   final List<Map<String, dynamic>> _menuItems = [
@@ -16,6 +20,17 @@ class Home extends StatelessWidget {
     {'title': 'Authors', 'screen': const AuthorsScreen()},
     {'title': 'Keywords', 'screen': const KeywordsScreen()},
   ];
+
+  Future<String> _getUsername() async {
+    final User? user = _firebaseAuth.currentUser;
+    if (user != null) {
+      final doc = await _firestore.collection('users').doc(user.uid).get();
+      if (doc.exists) {
+        return doc.data()?['username'] ?? 'Guest User';
+      }
+    }
+    return 'Guest User';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +65,21 @@ class Home extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  "Welcome!",
-                  style: TextStyle(fontSize: 20),
+                FutureBuilder<String>(
+                  future: _getUsername(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+                    return Text(
+                      "Welcome, ${snapshot.data ?? 'Guest User'}",
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.blue,
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 30),
                 _buildMenuButtons(context),
