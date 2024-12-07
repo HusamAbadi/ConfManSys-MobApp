@@ -26,7 +26,7 @@ class DayTile extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.fromLTRB(20.0, 6.0, 20.0, 0.0),
         shape: RoundedRectangleBorder(
-          side: BorderSide(color: cardBorderColor, width: 2.0),
+          side: BorderSide(color: cardBorderColor, width: 3.0),
           borderRadius: BorderRadius.circular(12.0),
         ),
         child: ListTile(

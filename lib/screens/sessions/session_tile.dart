@@ -118,122 +118,108 @@ class SessionTile extends StatelessWidget {
         cardBorderColor = Colors.green; // Session is ongoing
       }
 
-      return FutureProvider<List<Person>?>(
-        create: (context) =>
-            DatabaseService(uid: 'uid').fetchChairPersons(session.chairPersons),
-        initialData: null,
-        child: Card(
-          margin: const EdgeInsets.fromLTRB(20.0, 6.0, 20.0, 0.0),
-          shape: RoundedRectangleBorder(
-            side: BorderSide(color: cardBorderColor, width: 2.0),
-            borderRadius:
-                BorderRadius.circular(12.0), // Adjust the radius as needed
-          ),
-          child: Column(
-            children: [
-              Stack(
-                children: [
-                  ListTile(
-                    leading: const Icon(
-                      Icons.sensors_outlined,
-                      color: Colors.blue,
-                    ),
-                    title: Text(
-                      session.title,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(session.location),
-                        // const SizedBox(height: 8.0),
-                        Consumer<List<Person>?>(
-                            builder: (context, chairPersons, child) {
-                          if (chairPersons == null) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          } else if (chairPersons.isEmpty) {
-                            return const Center(
-                                child: Text('No chairpersons found.'));
-                          }
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                "Chaired by: ",
-                                style: TextStyle(
-                                    color: Colors
-                                        .black), // Normal text stays black
-                              ),
-                              // SingleChildScrollView to make the row scrollable horizontally
-                              SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  children: chairPersons.map((chairPerson) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                          right: 8.0), // Space between names
-                                      child: Text(
-                                        chairPerson.name,
-                                        style: const TextStyle(
-                                            color: Colors
-                                                .lightBlue), // Chairpersons' names in light blue
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                            ],
-                          );
-                        }),
-                      ],
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PapersScreen.session(
-                              session: session,
-                              conference: conference,
-                              dayIncrement: dayIncrement,
-                              sessionIncrement: sessionIncrement),
-                        ),
-                      );
-                    },
-                  ),
-                  // Start Time Positioned at top-right
-                  Positioned(
-                    top: 8.0,
-                    right: 8.0,
-                    child: Text(
-                      formattedStartTime,
-                      style: const TextStyle(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  // End Time Positioned at bottom-right
-                  Positioned(
-                    bottom: 8.0,
-                    right: 8.0,
-                    child: Text(
-                      formattedEndTime,
-                      style: const TextStyle(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+      return FutureProvider<List<Person>?>(create: (context) => DatabaseService(uid: 'uid').fetchChairPersons(session.chairPersons), initialData: null, child: Card(
+        margin: const EdgeInsets.fromLTRB(20.0, 6.0, 20.0, 0.0),
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: cardBorderColor, width: 3.0),
+          borderRadius: BorderRadius.circular(12.0), // Adjust the radius as needed
         ),
-      );
+        child: Column(
+          children: [
+            Stack(
+              children: [
+                ListTile(
+                  leading: const Icon(
+                    Icons.sensors_outlined,
+                    color: Colors.blue,
+                  ),
+                  title: Text(
+                    session.title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(session.location),
+                      // const SizedBox(height: 8.0),
+                      Consumer<List<Person>?>(builder: (context, chairPersons, child) {
+                        if (chairPersons == null) {
+                          return const Center(child: CircularProgressIndicator());
+                        } else if (chairPersons.isEmpty) {
+                          return const Center(child: Text('No chairpersons found.'));
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Chaired by: ",
+                              style: TextStyle(color: Colors.black), // Normal text stays black
+                            ),
+                            // SingleChildScrollView to make the row scrollable horizontally
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: chairPersons.map((chairPerson) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 8.0), // Space between names
+                                    child: Text(
+                                      chairPerson.name,
+                                      style: const TextStyle(color: Colors.lightBlue), // Chairpersons' names in light blue
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                        );
+                      }),
+                    ],
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PapersScreen.session(
+                            session: session,
+                            conference: conference,
+                            dayIncrement: dayIncrement,
+                            sessionIncrement: sessionIncrement),
+                      ),
+                    );
+                  },
+                ),
+                // Start Time Positioned at top-right
+                Positioned(
+                  top: 8.0,
+                  right: 8.0,
+                  child: Text(
+                    formattedStartTime,
+                    style: const TextStyle(
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                // End Time Positioned at bottom-right
+                Positioned(
+                  bottom: 8.0,
+                  right: 8.0,
+                  child: Text(
+                    formattedEndTime,
+                    style: const TextStyle(
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ));
     }
   }
 }

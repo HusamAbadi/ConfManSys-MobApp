@@ -34,7 +34,7 @@ class ConferenceTile extends StatelessWidget {
       child: Card(
         elevation: 4,
         shape: RoundedRectangleBorder(
-          side: BorderSide(color: cardBorderColor, width: 2.0),
+          side: BorderSide(color: cardBorderColor, width: 3.0),
           borderRadius: BorderRadius.circular(12.0),
         ),
         child: ListTile(
