@@ -1,6 +1,7 @@
 import 'package:conference_management_system/screens/conferences/conferences_screen.dart';
 import 'package:conference_management_system/screens/authors/authors_screen.dart';
 import 'package:conference_management_system/screens/keywords/keywords_screen.dart';
+import 'package:conference_management_system/screens/favorite_papers/favorite_papers_screen.dart';
 import 'package:conference_management_system/services/auth.dart';
 import 'package:conference_management_system/shared/constants.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ class Home extends StatelessWidget {
     {'title': 'Conferences', 'screen': const ConferencesScreen()},
     {'title': 'Authors', 'screen': const AuthorsScreen()},
     {'title': 'Keywords', 'screen': const KeywordsScreen()},
+    {'title': 'Favorite Papers', 'screen': const FavoritePapersScreen()},
   ];
 
   Future<String> _getUsername() async {

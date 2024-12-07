@@ -131,6 +131,14 @@ class DatabaseService {
     }
   }
 
+  /// Adds a paper to the user's favorite papers list in Firestore.
+  ///
+  /// If the paper is not already in the list, it is added. Otherwise, the
+  /// function does nothing.
+  ///
+  /// The function returns a Future<void> that resolves when the operation is
+  /// complete. If an error occurs during the operation, the Future is rejected
+  /// with the error.
   Future<void> addFavoritePaper(String paperId) async {
     try {
       final userDoc = usersCollection
@@ -217,26 +225,53 @@ class DatabaseService {
         keywordsCollection, Keyword.fromFirestore);
   }
 
+  Future<List<Paper>> fetchFavoritePapers() async {
+    try {
+      final userDoc = await usersCollection.doc(uid).get();
+      final List<dynamic> favoritePaperIds =
+          userDoc.get('favoritePapers') ?? [];
+
+      // Use Future.wait to fetch all papers in parallel while maintaining order
+      final futures = favoritePaperIds.map((paperId) async {
+        final paperDoc = await papersCollection.doc(paperId).get();
+        if (paperDoc.exists) {
+          return Paper.fromFirestore(paperDoc);
+        }
+        return null;
+      }).toList();
+
+      final papers = await Future.wait(futures);
+      // Filter out any null values (papers that weren't found) while maintaining order
+      return papers.whereType<Paper>().toList();
+    } catch (e) {
+      print('Error fetching favorite papers: $e');
+      return [];
+    }
+  }
+
   //* Generic Fetch Method
   Future<List<T>> fetchDocuments<T>(CollectionReference collection,
       T Function(DocumentSnapshot doc) fromFirestore) async {
     try {
       print('Fetching documents from ${collection.path}'); // Debug log
       QuerySnapshot snapshot = await collection.get();
-      print('Found ${snapshot.docs.length} documents in ${collection.path}'); // Debug log
-      
+      print(
+          'Found ${snapshot.docs.length} documents in ${collection.path}'); // Debug log
+
       List<T> results = [];
       for (var doc in snapshot.docs) {
         try {
           results.add(fromFirestore(doc));
         } catch (e) {
-          print('Error parsing document ${doc.id}: $e'); // Debug log for parsing errors
+          print(
+              'Error parsing document ${doc.id}: $e'); // Debug log for parsing errors
         }
       }
-      
+
       return results;
     } catch (e) {
-      print('Error fetching documents from ${collection.path}: $e'); // Debug log for fetch errors
+      print(
+          'Error fetching documents from ${collection.path}: $e'); // Debug log for fetch errors
       return [];
     }
   }
