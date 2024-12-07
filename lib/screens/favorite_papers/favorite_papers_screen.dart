@@ -66,6 +66,9 @@ class FavoritePapersList extends StatelessWidget {
       );
     }
 
+    // Sort papers by title
+    papers.sort((a, b) => a.title.compareTo(b.title));
+
     return ListView.builder(
       itemCount: papers.length,
       itemBuilder: (context, index) {
