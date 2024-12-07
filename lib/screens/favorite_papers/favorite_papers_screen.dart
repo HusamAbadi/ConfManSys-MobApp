@@ -121,7 +121,7 @@ class FavoritePapersList extends StatelessWidget {
                             }
                             return Row(
                               children: [
-                                const Text("Authors: "),
+                                const Text("Authors:    "),
                                 const SizedBox(width: 10.0),
                                 Flexible(
                                   child: SingleChildScrollView(
