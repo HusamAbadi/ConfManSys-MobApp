@@ -18,15 +18,7 @@ class KeywordsScreen extends StatelessWidget {
         titleTextStyle: titleFontStyle,
       ),
       body: FutureProvider<List<Keyword>?>(
-        // Provider for keywords
-        create: (context) async {
-          try {
-            return await DatabaseService(uid: 'uid').fetchAllKeywords();
-          } catch (e) {
-            // Handle any error that may occur during fetching
-            return []; // Return an empty list if there's an error
-          }
-        },
+        create: (context) => DatabaseService(uid: 'uid').fetchAllKeywords(),
         initialData: null,
         child: Column(
           children: [

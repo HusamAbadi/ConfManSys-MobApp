@@ -10,7 +10,6 @@ void main() async {
 
   // Initialize Firebase with error handling
   await Firebase.initializeApp();
-
   runApp(const MainApp());
 }
 

@@ -221,9 +221,22 @@ class DatabaseService {
   Future<List<T>> fetchDocuments<T>(CollectionReference collection,
       T Function(DocumentSnapshot doc) fromFirestore) async {
     try {
+      print('Fetching documents from ${collection.path}'); // Debug log
       QuerySnapshot snapshot = await collection.get();
-      return snapshot.docs.map((doc) => fromFirestore(doc)).toList();
+      print('Found ${snapshot.docs.length} documents in ${collection.path}'); // Debug log
+      
+      List<T> results = [];
+      for (var doc in snapshot.docs) {
+        try {
+          results.add(fromFirestore(doc));
+        } catch (e) {
+          print('Error parsing document ${doc.id}: $e'); // Debug log for parsing errors
+        }
+      }
+      
+      return results;
     } catch (e) {
+      print('Error fetching documents from ${collection.path}: $e'); // Debug log for fetch errors
       return [];
     }
   }
