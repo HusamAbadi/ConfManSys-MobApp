@@ -19,6 +19,10 @@ class AuthorsList extends StatelessWidget {
       return const Center(child: Text("No authors found"));
     }
 
+    // Sort authors by name in ascending order
+    final sortedAuthors = List<Person>.from(authors)
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3, // Number of tiles per row
@@ -26,10 +30,10 @@ class AuthorsList extends StatelessWidget {
         mainAxisSpacing: 5.0, // Space between rows
         childAspectRatio: 1.5, // Increase the width of each tile
       ),
-      itemCount: authors.length,
+      itemCount: sortedAuthors.length,
       itemBuilder: (context, index) {
         return AuthorsTile(
-          author: authors[index],
+          author: sortedAuthors[index],
         );
       },
     );

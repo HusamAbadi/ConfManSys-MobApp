@@ -19,17 +19,17 @@ class DayTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     DateTime now = DateTime.now();
-    Color circleColor = _getCircleColor(now);
+    Color cardBorderColor = _getCardBorderColor(now);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Card(
         margin: const EdgeInsets.fromLTRB(20.0, 6.0, 20.0, 0.0),
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: cardBorderColor, width: 2.0),
+          borderRadius: BorderRadius.circular(12.0),
+        ),
         child: ListTile(
-          leading: CircleAvatar(
-            radius: 25.0,
-            backgroundColor: circleColor, // Set the color based on the status
-          ),
           title: Text(
             'Day $dayIncrement: ${DateFormat('EEEE, dd-MM-yyyy').format(day.date)}',
             style: const TextStyle(fontWeight: FontWeight.bold),
@@ -54,13 +54,13 @@ class DayTile extends StatelessWidget {
     );
   }
 
-  Color _getCircleColor(DateTime now) {
+  Color _getCardBorderColor(DateTime now) {
     if (now.isBefore(day.date)) {
-      return Colors.orange; // Day is upcoming
+      return Colors.orange; // Upcoming
     } else if (now.isAfter(day.endTime)) {
-      return Colors.red; // Day has ended
+      return Colors.red; // Ended
     } else {
-      return Colors.green; // Day is ongoing
+      return Colors.green; // Ongoing
     }
   }
 }

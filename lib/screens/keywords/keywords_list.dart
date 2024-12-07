@@ -22,6 +22,10 @@ class KeywordsList extends StatelessWidget {
       );
     }
 
+    // Sort keywords by name in ascending order
+    final sortedKeywords = List<Keyword>.from(keywords)
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3, // Number of tiles per row
@@ -29,10 +33,10 @@ class KeywordsList extends StatelessWidget {
         mainAxisSpacing: 5.0, // Space between rows
         childAspectRatio: 1.5, // Increase the width of each tile
       ),
-      itemCount: keywords.length,
+      itemCount: sortedKeywords.length,
       itemBuilder: (context, index) {
         return KeywordsTile(
-          keyword: keywords[index],
+          keyword: sortedKeywords[index],
         );
       },
     );

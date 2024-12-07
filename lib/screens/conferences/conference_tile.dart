@@ -20,27 +20,27 @@ class ConferenceTile extends StatelessWidget {
     DateTime now = DateTime.now();
 
     // Determine the status of the conference
-    Color circleColor;
+    Color cardBorderColor;
     if (now.isBefore(conference.startDate)) {
-      circleColor = Colors.orange; // Upcoming
+      cardBorderColor = Colors.orange; // Upcoming
     } else if (now.isAfter(conference.endDate)) {
-      circleColor = Colors.red; // Ended
+      cardBorderColor = Colors.red; // Ended
     } else {
-      circleColor = Colors.green; // Ongoing
+      cardBorderColor = Colors.green; // Ongoing
     }
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: Card(
-        elevation: 4, // Adds a slight shadow for depth
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: cardBorderColor, width: 2.0),
+          borderRadius: BorderRadius.circular(12.0),
+        ),
         child: ListTile(
-          leading: CircleAvatar(
-            radius: 25.0,
-            backgroundColor: circleColor,
-          ),
           title: Text(
             conference.name,
-            textAlign: TextAlign.center, // Center title
+            textAlign: TextAlign.center,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           subtitle: Column(
