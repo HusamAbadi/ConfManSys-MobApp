@@ -15,13 +15,16 @@ class Home extends StatelessWidget {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Define a list of button titles and their respective screens
   final List<Map<String, dynamic>> _menuItems = [
-    {'title': 'Conferences', 'screen': const ConferencesScreen()},
+    {'title': 'Conferences', 'screen': ConferencesScreen()},
     {'title': 'Authors', 'screen': const AuthorsScreen()},
     {'title': 'Keywords', 'screen': const KeywordsScreen()},
     {'title': 'Favorite Papers', 'screen': const FavoritePapersScreen()},
   ];
+
+  final ValueNotifier<double> _fontSizeNotifier = ValueNotifier(16.0);
+  final double _minFontSize = 12.0; // Minimum font size
+  final double _maxFontSize = 30.0; // Optional maximum font size
 
   Future<String> _getUsername() async {
     final User? user = _firebaseAuth.currentUser;
@@ -45,6 +48,22 @@ class Home extends StatelessWidget {
           backgroundColor: appBarColor,
           elevation: 0.0,
           actions: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.text_increase),
+              onPressed: () {
+                _fontSizeNotifier.value = (_fontSizeNotifier.value + 2)
+                    .clamp(_minFontSize, _maxFontSize);
+              },
+              tooltip: 'Increase Font Size',
+            ),
+            IconButton(
+              icon: const Icon(Icons.text_decrease),
+              onPressed: () {
+                _fontSizeNotifier.value = (_fontSizeNotifier.value - 2)
+                    .clamp(_minFontSize, _maxFontSize);
+              },
+              tooltip: 'Decrease Font Size',
+            ),
             TextButton.icon(
               icon: const Icon(Icons.person),
               label: const Text("Logout"),
@@ -59,33 +78,42 @@ class Home extends StatelessWidget {
         ),
         body: SafeArea(
           child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "Conferences Management System",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-                ),
-                const SizedBox(height: 10),
-                FutureBuilder<String>(
-                  future: _getUsername(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    }
-                    return Text(
-                      "Welcome, ${snapshot.data ?? 'Guest User'}",
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.blue,
+            child: ValueListenableBuilder<double>(
+              valueListenable: _fontSizeNotifier,
+              builder: (context, fontSize, child) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Conferences Management System",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: fontSize + 6,
                       ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 30),
-                _buildMenuButtons(context),
-              ],
+                    ),
+                    const SizedBox(height: 10),
+                    FutureBuilder<String>(
+                      future: _getUsername(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        }
+                        return Text(
+                          "Welcome, ${snapshot.data ?? 'Guest User'}",
+                          style: TextStyle(
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.blue,
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 30),
+                    _buildMenuButtons(context, fontSize),
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -93,8 +121,7 @@ class Home extends StatelessWidget {
     );
   }
 
-  // Method to build the menu buttons
-  Widget _buildMenuButtons(BuildContext context) {
+  Widget _buildMenuButtons(BuildContext context, double fontSize) {
     return Column(
       children: _menuItems.map((item) {
         return Padding(
@@ -108,7 +135,10 @@ class Home extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => item['screen']),
                 );
               },
-              child: Text(item['title']),
+              child: Text(
+                item['title'],
+                style: TextStyle(fontSize: fontSize),
+              ),
             ),
           ),
         );
@@ -116,7 +146,6 @@ class Home extends StatelessWidget {
     );
   }
 
-  // Method to show logout confirmation dialog
   Future<bool?> _showLogoutDialog(BuildContext context) {
     return showDialog<bool>(
       context: context,

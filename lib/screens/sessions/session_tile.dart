@@ -12,6 +12,7 @@ class SessionTile extends StatelessWidget {
   final Session session;
   final int dayIncrement;
   final int sessionIncrement;
+  final ValueNotifier<double> fontSizeNotifier;
 
   const SessionTile({
     super.key,
@@ -19,23 +20,23 @@ class SessionTile extends StatelessWidget {
     required this.conference,
     required this.sessionIncrement,
     required this.dayIncrement,
+    required this.fontSizeNotifier,
   });
 
   @override
   Widget build(BuildContext context) {
     DateTime now = DateTime.now();
-
     String formattedStartTime = DateFormat('hh:mm a').format(session.startTime);
     String formattedEndTime = DateFormat('hh:mm a').format(session.endTime);
 
     if (session.isBreak) {
-      // Design for break sessions
-      return Card(
-        margin: const EdgeInsets.fromLTRB(20.0, 6.0, 20.0, 0.0),
-        color: Colors.lightGreen[200],
-        child: Stack(
-          children: [
-            ListTile(
+      return ValueListenableBuilder<double>(
+        valueListenable: fontSizeNotifier,
+        builder: (context, fontSize, _) {
+          return Card(
+            margin: const EdgeInsets.fromLTRB(20.0, 6.0, 20.0, 0.0),
+            color: Colors.lightGreen[200],
+            child: ListTile(
               leading: const Icon(
                 Icons.access_time_sharp,
                 color: Colors.brown,
@@ -43,22 +44,16 @@ class SessionTile extends StatelessWidget {
               ),
               title: Text(
                 session.title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 18.0,
+                  fontSize: fontSize,
                 ),
               ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(session.location),
-                  // const SizedBox(height: 8.0),
-                  // Text("Start Time: $formattedStartTime"),
-                  // Text("End Time: $formattedEndTime"),
-                ],
+              subtitle: Text(
+                session.location,
+                style: TextStyle(fontSize: fontSize - 2),
               ),
               onTap: () {
-                // Show the description in a popup
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -68,7 +63,7 @@ class SessionTile extends StatelessWidget {
                       actions: [
                         TextButton(
                           onPressed: () {
-                            Navigator.of(context).pop(); // Close the dialog
+                            Navigator.of(context).pop();
                           },
                           child: const Text("Close"),
                         ),
@@ -78,148 +73,59 @@ class SessionTile extends StatelessWidget {
                 );
               },
             ),
-            // Start Time Positioned at top-right
-            Positioned(
-              top: 8.0,
-              right: 8.0,
-              child: Text(
-                formattedStartTime,
-                style: const TextStyle(
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-            // End Time Positioned at bottom-right
-            Positioned(
-              bottom: 8.0,
-              right: 8.0,
-              child: Text(
-                formattedEndTime,
-                style: const TextStyle(
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       );
     } else {
-      // Regular session design
       Color cardBorderColor;
       if (now.isBefore(session.startTime)) {
-        cardBorderColor = Colors.orange; // Session is upcoming
+        cardBorderColor = Colors.orange;
       } else if (now.isAfter(session.endTime)) {
-        cardBorderColor = Colors.red; // Session has ended
+        cardBorderColor = Colors.red;
       } else {
-        cardBorderColor = Colors.green; // Session is ongoing
+        cardBorderColor = Colors.green;
       }
 
-      return FutureProvider<List<Person>?>(create: (context) => DatabaseService(uid: 'uid').fetchChairPersons(session.chairPersons), initialData: null, child: Card(
-        margin: const EdgeInsets.fromLTRB(20.0, 6.0, 20.0, 0.0),
-        shape: RoundedRectangleBorder(
-          side: BorderSide(color: cardBorderColor, width: 3.0),
-          borderRadius: BorderRadius.circular(12.0), // Adjust the radius as needed
-        ),
-        child: Column(
-          children: [
-            Stack(
-              children: [
-                ListTile(
-                  leading: const Icon(
-                    Icons.sensors_outlined,
-                    color: Colors.blue,
-                  ),
-                  title: Text(
-                    session.title,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(session.location),
-                      // const SizedBox(height: 8.0),
-                      Consumer<List<Person>?>(builder: (context, chairPersons, child) {
-                        if (chairPersons == null) {
-                          return const Center(child: CircularProgressIndicator());
-                        } else if (chairPersons.isEmpty) {
-                          return const Center(child: Text('No chairpersons found.'));
-                        }
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Chaired by: ",
-                              style: TextStyle(color: Colors.black), // Normal text stays black
-                            ),
-                            // SingleChildScrollView to make the row scrollable horizontally
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: chairPersons.map((chairPerson) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(right: 8.0), // Space between names
-                                    child: Text(
-                                      chairPerson.name,
-                                      style: const TextStyle(color: Colors.lightBlue), // Chairpersons' names in light blue
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                          ],
-                        );
-                      }),
-                    ],
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PapersScreen.session(
-                            session: session,
-                            conference: conference,
-                            dayIncrement: dayIncrement,
-                            sessionIncrement: sessionIncrement),
-                      ),
-                    );
-                  },
-                ),
-                // Start Time Positioned at top-right
-                Positioned(
-                  top: 8.0,
-                  right: 8.0,
-                  child: Text(
-                    formattedStartTime,
-                    style: const TextStyle(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-                // End Time Positioned at bottom-right
-                Positioned(
-                  bottom: 8.0,
-                  right: 8.0,
-                  child: Text(
-                    formattedEndTime,
-                    style: const TextStyle(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-              ],
+      return ValueListenableBuilder<double>(
+        valueListenable: fontSizeNotifier,
+        builder: (context, fontSize, _) {
+          return Card(
+            margin: const EdgeInsets.fromLTRB(20.0, 6.0, 20.0, 0.0),
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: cardBorderColor, width: 3.0),
+              borderRadius: BorderRadius.circular(12.0),
             ),
-          ],
-        ),
-      ));
+            child: ListTile(
+              leading: const Icon(
+                Icons.sensors_outlined,
+                color: Colors.blue,
+              ),
+              title: Text(
+                session.title,
+                style:
+                    TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize),
+              ),
+              subtitle: Text(
+                session.location,
+                style: TextStyle(fontSize: fontSize - 2),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PapersScreen.session(
+                      session: session,
+                      conference: conference,
+                      dayIncrement: dayIncrement,
+                      sessionIncrement: sessionIncrement,
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      );
     }
   }
 }

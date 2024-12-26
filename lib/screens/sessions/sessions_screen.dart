@@ -6,6 +6,7 @@ import 'package:conference_management_system/services/database.dart';
 import 'package:conference_management_system/shared/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:conference_management_system/shared/custom_app_bar.dart'; // Import CustomAppBar
 
 class SessionsScreen extends StatelessWidget {
   final Day day;
@@ -21,62 +22,64 @@ class SessionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ValueNotifier<double> fontSizeNotifier =
+        ValueNotifier(16.0); // Font size notifier
 
-    return FutureProvider<List<Session>?>(
-      create: (context) {
-        debugPrint('Creating FutureProvider');
-        return DatabaseService(uid: 'uid')
-            .fetchSessions(
-          conference.id,
-          day.id,
-        )
-            .then((sessions) {
-          debugPrint('Fetched sessions: ${sessions?.length ?? 0}');
-          if (sessions != null) {
-            for (var session in sessions) {
-              debugPrint('Session: ${session.title}, ID: ${session.id}');
-            }
-          }
-          return sessions;
-        });
-      },
+    return FutureProvider<List<Session>?>( 
+      create: (context) => DatabaseService(uid: 'uid').fetchSessions(
+        conference.id,
+        day.id,
+      ),
       initialData: null,
       child: Scaffold(
         backgroundColor: bodyBackgroundColor,
-        appBar: AppBar(
-          backgroundColor: appBarColor,
-          titleTextStyle: titleFontStyle,
-          title: const Text("Back to Days Screen"),
+        appBar: CustomAppBar(
+          title: "Back to Days Screen",
+          fontSizeNotifier: fontSizeNotifier,
+          showBackButton: true,
         ),
-        body: _buildBody(context),
+        body: _buildBody(context, fontSizeNotifier),
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context) {
+  Widget _buildBody(BuildContext context, ValueNotifier<double> fontSizeNotifier) {
     return Column(
       children: [
         const SizedBox(height: 50.0),
-        Center(
-          child: Text(
-            conference.name,
-            style: titleFontStyle.copyWith(fontWeight: FontWeight.bold),
-          ),
+        ValueListenableBuilder<double>(
+          valueListenable: fontSizeNotifier,
+          builder: (context, fontSize, _) {
+            return Center(
+              child: Column(
+                children: [
+                  Text(
+                    conference.name,
+                    style: titleFontStyle.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: fontSize + 2,
+                    ),
+                  ),
+                  Text(
+                    "Day ${dayIncrement.toString()}",
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
-        Text("Day ${dayIncrement.toString()}",
-            style:
-                const TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
         const SizedBox(height: 40.0),
         Expanded(
-          child: Consumer<List<Session>?>(
+          child: Consumer<List<Session>?>( 
             builder: (context, sessions, child) {
-              debugPrint(
-                  'Consumer builder called with sessions: ${sessions?.length}');
               if (sessions == null) {
                 return const Center(child: CircularProgressIndicator());
               }
               if (sessions.isEmpty) {
-                debugPrint('Sessions list is empty');
                 return const Center(
                   child: Text('No sessions available for this day.'),
                 );
@@ -86,6 +89,7 @@ class SessionsScreen extends StatelessWidget {
                 day: day,
                 sessions: sessions,
                 dayIncrement: dayIncrement,
+                fontSizeNotifier: fontSizeNotifier,
               );
             },
           ),

@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class KeywordsList extends StatelessWidget {
-  const KeywordsList({super.key});
+  final ValueNotifier<double> fontSizeNotifier;
+
+  const KeywordsList({super.key, required this.fontSizeNotifier});
 
   @override
   Widget build(BuildContext context) {
@@ -22,21 +24,21 @@ class KeywordsList extends StatelessWidget {
       );
     }
 
-    // Sort keywords by name in ascending order
     final sortedKeywords = List<Keyword>.from(keywords)
       ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
 
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3, // Number of tiles per row
-        crossAxisSpacing: 0.0, // Space between columns
-        mainAxisSpacing: 5.0, // Space between rows
-        childAspectRatio: 1.5, // Increase the width of each tile
+        crossAxisCount: 3,
+        crossAxisSpacing: 0.0,
+        mainAxisSpacing: 5.0,
+        childAspectRatio: 1.5,
       ),
       itemCount: sortedKeywords.length,
       itemBuilder: (context, index) {
         return KeywordsTile(
           keyword: sortedKeywords[index],
+          fontSizeNotifier: fontSizeNotifier,
         );
       },
     );

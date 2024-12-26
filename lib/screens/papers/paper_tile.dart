@@ -8,65 +8,64 @@ import 'package:provider/provider.dart';
 class PaperTile extends StatelessWidget {
   final Paper paper;
   final String sessionId;
+  final ValueNotifier<double> fontSizeNotifier;
 
-  const PaperTile({super.key, required this.paper, required this.sessionId});
+  const PaperTile({
+    super.key,
+    required this.paper,
+    required this.sessionId,
+    required this.fontSizeNotifier,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.fromLTRB(20.0, 6.0, 20.0, 0.0),
-      child: ListTile(
-        title: Text(
-          paper.title,
-          style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-        ),
-        trailing: sessionId != "0"
-            ? IconButton(
-                icon: const Icon(Icons.favorite_border),
-                onPressed: () {
-                  _saveAsFavorite(context);
-                },
-                tooltip: 'Save as Favorite',
-              )
-            : null,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  PaperDetails(paper: paper, sessionId: sessionId),
+    return ValueListenableBuilder<double>(
+      valueListenable: fontSizeNotifier,
+      builder: (context, fontSize, _) {
+        return Card(
+          margin: const EdgeInsets.fromLTRB(20.0, 6.0, 20.0, 0.0),
+          child: ListTile(
+            title: Text(
+              paper.title,
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          );
-        },
-      ),
+            trailing: IconButton(
+              icon: const Icon(Icons.favorite_border),
+              onPressed: () {
+                _saveAsFavorite(context);
+              },
+              tooltip: 'Save as Favorite',
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      PaperDetails(paper: paper, sessionId: sessionId),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
   Future<void> _saveAsFavorite(BuildContext context) async {
     try {
-      // Get the current user's ID
       final user = FirebaseAuth.instance.currentUser;
-
       final uid = user!.uid;
-
-      // Access the DatabaseService
       final database = DatabaseService(uid: uid);
-
-      // Add the paper to the user's favorite papers
       await database.addFavoritePaper(paper.id);
-
-      // Show a success message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${paper.title} saved as favorite!'),
-        ),
+        SnackBar(content: Text('${paper.title} saved as favorite!')),
       );
     } catch (e) {
-      // Show an error message in case of failure
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to save favorite: $e'),
-        ),
+        SnackBar(content: Text('Failed to save favorite: $e')),
       );
     }
   }

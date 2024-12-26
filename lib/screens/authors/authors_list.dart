@@ -4,36 +4,37 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class AuthorsList extends StatelessWidget {
-  const AuthorsList({super.key});
+  final ValueNotifier<double> fontSizeNotifier;
+
+  const AuthorsList({super.key, required this.fontSizeNotifier});
 
   @override
   Widget build(BuildContext context) {
     final authors = Provider.of<List<Person>?>(context);
 
     if (authors == null) {
-      return const Center(
-          child: CircularProgressIndicator()); // Loading indicator
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (authors.isEmpty) {
       return const Center(child: Text("No authors found"));
     }
 
-    // Sort authors by name in ascending order
     final sortedAuthors = List<Person>.from(authors)
       ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
 
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3, // Number of tiles per row
-        crossAxisSpacing: 0.0, // Space between columns
-        mainAxisSpacing: 5.0, // Space between rows
-        childAspectRatio: 1.5, // Increase the width of each tile
+        crossAxisCount: 3,
+        crossAxisSpacing: 0.0,
+        mainAxisSpacing: 5.0,
+        childAspectRatio: 1.5,
       ),
       itemCount: sortedAuthors.length,
       itemBuilder: (context, index) {
         return AuthorsTile(
           author: sortedAuthors[index],
+          fontSizeNotifier: fontSizeNotifier,
         );
       },
     );

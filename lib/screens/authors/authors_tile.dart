@@ -4,32 +4,45 @@ import 'package:flutter/material.dart';
 
 class AuthorsTile extends StatelessWidget {
   final Person author;
+  final ValueNotifier<double> fontSizeNotifier;
 
-  const AuthorsTile({super.key, required this.author});
+  const AuthorsTile({
+    super.key,
+    required this.author,
+    required this.fontSizeNotifier,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4, // Adding elevation for shadow effect
-      child: ListTile(
-        title: Text(
-          author.name,
-          textAlign: TextAlign.center,
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-        ),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => PapersScreen.author(
-                author: author,
+    return ValueListenableBuilder<double>(
+      valueListenable: fontSizeNotifier,
+      builder: (context, fontSize, _) {
+        return Card(
+          elevation: 4,
+          child: ListTile(
+            title: Text(
+              author.name,
+              textAlign: TextAlign.center,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: fontSize - 2,
               ),
             ),
-          );
-        },
-      ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PapersScreen.author(
+                    author: author,
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

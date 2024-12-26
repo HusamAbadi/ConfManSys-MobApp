@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ConferencesList extends StatefulWidget {
-  const ConferencesList({super.key});
+  final ValueNotifier<double> fontSizeNotifier;
+
+  const ConferencesList({super.key, required this.fontSizeNotifier});
 
   @override
   State<ConferencesList> createState() => _ConferencesListState();
@@ -35,7 +37,10 @@ class _ConferencesListState extends State<ConferencesList> {
       itemBuilder: (context, index) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-          child: ConferenceTile(conference: conferences[index]),
+          child: ConferenceTile(
+            conference: conferences[index],
+            fontSizeNotifier: widget.fontSizeNotifier,
+          ),
         );
       },
     );

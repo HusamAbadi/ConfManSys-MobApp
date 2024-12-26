@@ -9,6 +9,10 @@ import 'package:conference_management_system/shared/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:conference_management_system/shared/custom_app_bar.dart';
+
 class PapersScreen extends StatelessWidget {
   final Session? session;
   final Conference? conference;
@@ -17,7 +21,6 @@ class PapersScreen extends StatelessWidget {
   final int? dayIncrement;
   final int? sessionIncrement;
 
-  // Constructor for SessionTile navigation
   const PapersScreen.session({
     super.key,
     required this.session,
@@ -27,7 +30,6 @@ class PapersScreen extends StatelessWidget {
   })  : author = null,
         keyword = null;
 
-  // Constructor for AuthorsTile navigation
   const PapersScreen.author({
     super.key,
     required this.author,
@@ -37,7 +39,6 @@ class PapersScreen extends StatelessWidget {
         dayIncrement = null,
         sessionIncrement = null;
 
-  // Constructor for KeywordsTile navigation
   const PapersScreen.keyword({
     super.key,
     required this.keyword,
@@ -49,18 +50,21 @@ class PapersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Select which screen to build based on available parameters
+    final ValueNotifier<double> fontSizeNotifier =
+        ValueNotifier(16.0); // Font size notifier
+
     if (author != null) {
-      return _buildAuthorPapersScreen();
+      return _buildAuthorPapersScreen(fontSizeNotifier);
     } else if (keyword != null) {
-      return _buildKeywordPapersScreen();
+      return _buildKeywordPapersScreen(fontSizeNotifier);
     } else {
-      return _buildSessionPapersScreen();
+      return _buildSessionPapersScreen(fontSizeNotifier);
     }
   }
 
-  Widget _buildSessionPapersScreen() {
+  Widget _buildSessionPapersScreen(ValueNotifier<double> fontSizeNotifier) {
     return _buildPapersScreen(
+      fontSizeNotifier: fontSizeNotifier,
       appBarTitle: "Back to Sessions Screen",
       title: "${conference?.name}",
       fetchPapers: () =>
@@ -68,8 +72,9 @@ class PapersScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAuthorPapersScreen() {
+  Widget _buildAuthorPapersScreen(ValueNotifier<double> fontSizeNotifier) {
     return _buildPapersScreen(
+      fontSizeNotifier: fontSizeNotifier,
       appBarTitle: "Back to Authors Screen",
       title: "Papers by ${author!.name}",
       fetchPapers: () =>
@@ -77,8 +82,9 @@ class PapersScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildKeywordPapersScreen() {
+  Widget _buildKeywordPapersScreen(ValueNotifier<double> fontSizeNotifier) {
     return _buildPapersScreen(
+      fontSizeNotifier: fontSizeNotifier,
       appBarTitle: 'Back to Keywords Screen',
       title: "${keyword!.name} keyword",
       fetchPapers: () =>
@@ -87,6 +93,7 @@ class PapersScreen extends StatelessWidget {
   }
 
   Widget _buildPapersScreen({
+    required ValueNotifier<double> fontSizeNotifier,
     required String appBarTitle,
     required String title,
     required Future<List<Paper>?> Function() fetchPapers,
@@ -96,20 +103,28 @@ class PapersScreen extends StatelessWidget {
       initialData: null,
       child: Scaffold(
         backgroundColor: bodyBackgroundColor,
-        appBar: AppBar(
-          backgroundColor: appBarColor,
-          title: Text(appBarTitle),
-          titleTextStyle: titleFontStyle,
+        appBar: CustomAppBar(
+          title: appBarTitle,
+          fontSizeNotifier: fontSizeNotifier,
+          showBackButton: true,
         ),
         body: Column(
           children: [
             const SizedBox(height: 50.0),
-            Center(
-              child: Text(
-                title,
-                style: titleFontStyle.copyWith(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
+            ValueListenableBuilder<double>(
+              valueListenable: fontSizeNotifier,
+              builder: (context, fontSize, _) {
+                return Center(
+                  child: Text(
+                    title,
+                    style: titleFontStyle.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: fontSize + 4,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 40.0),
             Expanded(
@@ -121,14 +136,11 @@ class PapersScreen extends StatelessWidget {
                   if (papers.isEmpty) {
                     return const Center(child: Text('No papers available.'));
                   }
-                  if (session == null) {
-                    return PapersList(
-                      papers: papers,
-                      sessionId: session?.id.toString() ?? "0",
-                    );
-                  } else {
-                    return PapersList(papers: papers, sessionId: session!.id);
-                  }
+                  return PapersList(
+                    papers: papers,
+                    sessionId: session?.id.toString() ?? "0",
+                    fontSizeNotifier: fontSizeNotifier,
+                  );
                 },
               ),
             ),

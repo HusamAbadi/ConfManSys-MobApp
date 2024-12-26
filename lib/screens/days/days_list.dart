@@ -6,8 +6,13 @@ import 'package:provider/provider.dart';
 
 class DaysList extends StatelessWidget {
   final Conference? conference;
+  final ValueNotifier<double> fontSizeNotifier;
 
-  const DaysList({this.conference, super.key});
+  const DaysList({
+    this.conference,
+    required this.fontSizeNotifier,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +26,8 @@ class DaysList extends StatelessWidget {
     // Show message if there are no days available
     if (days.isEmpty) {
       return const Center(
-          child: Text('No days available for this conference.'));
+        child: Text('No days available for this conference.'),
+      );
     }
 
     // Sort the days list based on the date
@@ -33,7 +39,8 @@ class DaysList extends StatelessWidget {
         return DayTile(
           day: days[index],
           conference: conference!,
-          dayIncrement: index + 1, // Increment based on index
+          dayIncrement: index + 1,
+          fontSizeNotifier: fontSizeNotifier,
         );
       },
     );

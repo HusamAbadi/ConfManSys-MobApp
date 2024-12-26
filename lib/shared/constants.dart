@@ -8,6 +8,6 @@ const textInputDecoration = InputDecoration(
     focusedBorder: OutlineInputBorder(
         borderSide: BorderSide(color: Colors.lightBlue, width: 2.0)));
 
-var appBarColor = Colors.amber[300];
+var appBarColor = Colors.amber[400];
 var bodyBackgroundColor = Colors.amber[100];
 var titleFontStyle = const TextStyle(color: Colors.black, fontSize: 20);
