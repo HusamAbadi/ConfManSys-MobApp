@@ -163,6 +163,26 @@ class DatabaseService {
     }
   }
 
+  Future<void> addReport(String report) async {
+    try {
+      final userDoc = usersCollection
+          .doc(uid); // Assuming 'uid' is the user's unique identifier
+
+      // Get the current list of favorite papers
+      DocumentSnapshot userSnapshot = await userDoc.get();
+      List<dynamic> reports =
+          (userSnapshot.data() as Map<String, dynamic>)['reports'] ?? [];
+
+      reports.add(report);
+
+      await userDoc.update({
+        'reports': reports,
+      });
+    } catch (e) {
+      print("Error adding report: $e");
+    }
+  }
+
   Future<List<Paper>> fetchPapersByAuthor(String authorId) async {
     List<Paper> papers = [];
     QuerySnapshot querySnapshot =

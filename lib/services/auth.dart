@@ -7,20 +7,29 @@ class AuthService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   AppUser? _userFromFirebaseUser(User? user) {
-    return user != null ? AppUser(id: user.uid, username: '', favoritePapers: []) : null;
+    return user != null
+        ? AppUser(
+            id: user.uid,
+            username: '',
+            favoritePapers: [],
+            reports: [],
+          )
+        : null;
   }
 
   Stream<AppUser?> get userStream {
     return _auth.authStateChanges().asyncMap((User? user) async {
       if (user != null) {
         try {
-          DocumentSnapshot doc = await _firestore.collection('users').doc(user.uid).get();
+          DocumentSnapshot doc =
+              await _firestore.collection('users').doc(user.uid).get();
           return AppUser.fromFirestore(doc);
         } catch (e) {
           return AppUser(
             id: user.uid,
             username: 'Guest User',
             favoritePapers: [],
+            reports: [],
           );
         }
       }
@@ -32,15 +41,16 @@ class AuthService {
     try {
       UserCredential result = await _auth.signInAnonymously();
       User? user = result.user;
-      
+
       if (user != null) {
         // Create user document in Firestore
         await _firestore.collection('users').doc(user.uid).set({
           'username': 'Guest User',
           'favoritePapers': [],
+          'reports': [],
         });
       }
-      
+
       return _userFromFirebaseUser(user);
     } catch (e) {
       return null;
@@ -71,18 +81,20 @@ class AuthService {
       UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       User? user = result.user;
-      
+
       if (user != null) {
         // Create user document in Firestore
         await _firestore.collection('users').doc(user.uid).set({
           'username': username,
           'favoritePapers': [],
+          'reports': [],
         });
-        
+
         return AppUser(
           id: user.uid,
           username: username,
           favoritePapers: [],
+          reports: [],
         );
       }
       return null;
