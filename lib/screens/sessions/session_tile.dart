@@ -49,9 +49,15 @@ class SessionTile extends StatelessWidget {
                   fontSize: fontSize,
                 ),
               ),
-              subtitle: Text(
-                session.location,
-                style: TextStyle(fontSize: fontSize - 2),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    session.location,
+                    style: TextStyle(fontSize: fontSize - 2),
+                  ),
+                  Text("${formattedStartTime} - ${formattedEndTime}")
+                ],
               ),
               onTap: () {
                 showDialog(
@@ -102,12 +108,21 @@ class SessionTile extends StatelessWidget {
               ),
               title: Text(
                 session.title,
-                style:
-                    TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: fontSize,
+                ),
               ),
-              subtitle: Text(
-                session.location,
-                style: TextStyle(fontSize: fontSize - 2),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Location: ${session.location}",
+                    style: TextStyle(fontSize: fontSize - 2),
+                  ),
+                  const SizedBox(height: 5),
+                  Text("${formattedStartTime} - ${formattedEndTime}"),
+                ],
               ),
               onTap: () {
                 Navigator.push(
@@ -120,6 +135,25 @@ class SessionTile extends StatelessWidget {
                       sessionIncrement: sessionIncrement,
                     ),
                   ),
+                );
+              },
+              onLongPress: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text("Session Details"),
+                      content: Text(session.description),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text("Close"),
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
             ),

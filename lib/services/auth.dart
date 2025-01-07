@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:conference_management_system/models/user.dart';
+import 'package:conference_management_system/services/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
@@ -82,13 +83,26 @@ class AuthService {
           email: email, password: password);
       User? user = result.user;
 
+      // final user = FirebaseAuth.instance.currentUser;
+      final uid = user!.uid;
+      final database = DatabaseService(uid: uid);
+
       if (user != null) {
+        // Log user creation
+        print('Firebase Authentication succeeded for UID: ${user.uid}');
+
         // Create user document in Firestore
-        await _firestore.collection('users').doc(user.uid).set({
-          'username': username,
-          'favoritePapers': [],
-          'reports': [],
-        });
+        try {
+          await _firestore.collection('users').doc(uid).set({
+            'username': username,
+            'favoritePapers': ['0'],
+            'reports': ['0'],
+          });
+          print('User document successfully created in Firestore.');
+        } catch (e) {
+          print('Error creating user document in Firestore: $e');
+          return null;
+        }
 
         return AppUser(
           id: user.uid,
@@ -99,6 +113,7 @@ class AuthService {
       }
       return null;
     } catch (e) {
+      print('Error during user registration: $e');
       return null;
     }
   }

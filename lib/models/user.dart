@@ -20,7 +20,7 @@ factory AppUser.fromFirestore(DocumentSnapshot doc) {
     id: doc.id,
     username: data['username'] ?? 'Guest User',
     favoritePapers: List<String>.from(data['favoritePapers'] ?? []),
-    reports: List<String>.from(data['reports'] ?? []), // Handle missing field
+    reports: List<String>.from(data['reports'] ?? []),
   );
 }
 
@@ -30,7 +30,7 @@ factory AppUser.fromFirestore(DocumentSnapshot doc) {
     return {
       'username': username,
       'favoritePapers': favoritePapers,
-      'reports': reports, // Include reports in the map
+      'reports': reports,
     };
   }
 }

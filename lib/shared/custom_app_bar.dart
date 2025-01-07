@@ -100,7 +100,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
                     // Add the report to Firestore
                     await dbService.addReport(report);
-
+                    print(report);
                     // Show success message
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
