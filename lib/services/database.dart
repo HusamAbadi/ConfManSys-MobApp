@@ -269,6 +269,29 @@ class DatabaseService {
     }
   }
 
+  /// Checks if a paper is already in the user's favorite papers list.
+  ///
+  /// Returns a Future<bool> that resolves to true if the paper is in the favorites list,
+  /// false otherwise.
+  Future<bool> isPaperInFavorites(String paperId) async {
+    try {
+      final userDoc = usersCollection.doc(uid);
+      DocumentSnapshot userSnapshot = await userDoc.get();
+      
+      if (!userSnapshot.exists) {
+        return false;
+      }
+
+      final userData = userSnapshot.data() as Map<String, dynamic>;
+      final List<dynamic> favoritePapers = userData['favoritePapers'] ?? [];
+      
+      return favoritePapers.contains(paperId);
+    } catch (e) {
+      print("Error checking favorite paper: $e");
+      return false;
+    }
+  }
+
   //* Generic Fetch Method
   Future<List<T>> fetchDocuments<T>(CollectionReference collection,
       T Function(DocumentSnapshot doc) fromFirestore) async {
