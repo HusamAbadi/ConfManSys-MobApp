@@ -7,11 +7,11 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  AppUser? _userFromFirebaseUser(User? user) {
+  AppUser? _userFromFirebaseUser(User? user, {String username = 'Guest User'}) {
     return user != null
         ? AppUser(
             id: user.uid,
-            username: '',
+            username: username, // Use the provided username
             favoritePapers: [],
             reports: [],
           )
@@ -24,7 +24,23 @@ class AuthService {
         try {
           DocumentSnapshot doc =
               await _firestore.collection('users').doc(user.uid).get();
-          return AppUser.fromFirestore(doc);
+          if (doc.exists) {
+            String username = doc.get('username');
+            return AppUser.fromFirestore(doc);
+          } else {
+            // If the document doesn't exist, create one with default values
+            await _firestore.collection('users').doc(user.uid).set({
+              'username': 'Guest User',
+              'favoritePapers': [],
+              'reports': [],
+            });
+            return AppUser(
+              id: user.uid,
+              username: 'Guest User',
+              favoritePapers: [],
+              reports: [],
+            );
+          }
         } catch (e) {
           return AppUser(
             id: user.uid,
@@ -38,25 +54,25 @@ class AuthService {
     });
   }
 
-  Future<AppUser?> signInAnon() async {
-    try {
-      UserCredential result = await _auth.signInAnonymously();
-      User? user = result.user;
+  // Future<AppUser?> signInAnon() async {
+  //   try {
+  //     UserCredential result = await _auth.signInAnonymously();
+  //     User? user = result.user;
 
-      if (user != null) {
-        // Create user document in Firestore
-        await _firestore.collection('users').doc(user.uid).set({
-          'username': 'Guest User',
-          'favoritePapers': [],
-          'reports': [],
-        });
-      }
+  //     if (user != null) {
+  //       // Create user document in Firestore
+  //       await _firestore.collection('users').doc(user.uid).set({
+  //         'username': 'Guest User',
+  //         'favoritePapers': [],
+  //         'reports': [],
+  //       });
+  //     }
 
-      return _userFromFirebaseUser(user);
-    } catch (e) {
-      return null;
-    }
-  }
+  //     return _userFromFirebaseUser(user);
+  //   } catch (e) {
+  //     return null;
+  //   }
+  // }
 
   Future<AppUser?> signInWithEmailAndPassword(
       String email, String password) async {
@@ -64,13 +80,28 @@ class AuthService {
       UserCredential result = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
       User? user = result.user;
-      return user != null
-          ? _firestore
-              .collection('users')
-              .doc(user.uid)
-              .get()
-              .then((doc) => AppUser.fromFirestore(doc))
-          : null;
+
+      if (user != null) {
+        // Fetch the user document from Firestore
+        DocumentSnapshot doc =
+            await _firestore.collection('users').doc(user.uid).get();
+
+        if (doc.exists) {
+          // Get the username from Firestore
+          String username = doc.get('username') ?? 'Guest User';
+          return _userFromFirebaseUser(user, username: username);
+        } else {
+          // If the document doesn't exist, create one with default values
+          await _firestore.collection('users').doc(user.uid).set({
+            'username': 'Guest User',
+            'favoritePapers': [],
+            'reports': [],
+          });
+          return _userFromFirebaseUser(
+              user); // Uses default "Guest User" username
+        }
+      }
+      return null;
     } catch (e) {
       return null;
     }
@@ -83,20 +114,16 @@ class AuthService {
           email: email, password: password);
       User? user = result.user;
 
-      // final user = FirebaseAuth.instance.currentUser;
-      final uid = user!.uid;
-      final database = DatabaseService(uid: uid);
-
       if (user != null) {
         // Log user creation
         print('Firebase Authentication succeeded for UID: ${user.uid}');
 
         // Create user document in Firestore
         try {
-          await _firestore.collection('users').doc(uid).set({
-            'username': username,
-            'favoritePapers': ['0'],
-            'reports': ['0'],
+          await _firestore.collection('users').doc(user.uid).set({
+            'username': username, // Use the provided username
+            'favoritePapers': [], // Initialize with empty list
+            'reports': [], // Initialize with empty list
           });
           print('User document successfully created in Firestore.');
         } catch (e) {
@@ -104,12 +131,8 @@ class AuthService {
           return null;
         }
 
-        return AppUser(
-          id: user.uid,
-          username: username,
-          favoritePapers: [],
-          reports: [],
-        );
+        // Return the AppUser object with the provided username
+        return _userFromFirebaseUser(user, username: username);
       }
       return null;
     } catch (e) {

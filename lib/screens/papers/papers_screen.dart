@@ -66,7 +66,7 @@ class PapersScreen extends StatelessWidget {
     return _buildPapersScreen(
       fontSizeNotifier: fontSizeNotifier,
       appBarTitle: "Back to Sessions Screen",
-      title: "${conference?.name}",
+      title: "${session?.title}",
       fetchPapers: () =>
           DatabaseService(uid: 'uid').fetchPapers(session!.papers),
     );

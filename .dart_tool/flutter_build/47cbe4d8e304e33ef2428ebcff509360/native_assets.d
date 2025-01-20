@@ -1,1 +1,0 @@
- E:\\University\\Graduation\ Requirements\\Diploma\ Work\\conference_management_system\\.dart_tool\\flutter_build\\47cbe4d8e304e33ef2428ebcff509360\\native_assets.yaml: 

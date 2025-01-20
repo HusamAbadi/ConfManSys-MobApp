@@ -29,12 +29,31 @@ class Home extends StatelessWidget {
   Future<String> _getUsername() async {
     final User? user = _firebaseAuth.currentUser;
     if (user != null) {
-      final doc = await _firestore.collection('users').doc(user.uid).get();
-      if (doc.exists) {
-        return doc.data()?['username'] ?? 'Guest User';
+      print("User is logged in with UID: ${user.uid}");
+      try {
+        final doc = await _firestore.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+          print("User document data: ${doc.data()}");
+          return doc.data()?['username'] ?? 'Guest User';
+        } else {
+          print("User document does not exist in Firestore.");
+          // Optionally, create the document here if it doesn't exist
+          await _firestore.collection('users').doc(user.uid).set({
+            'username': 'Guest User',
+            'favoritePapers': [],
+            'reports': [],
+          });
+          print("Created user document for UID: ${user.uid}");
+          return 'Guest User';
+        }
+      } catch (e) {
+        print("Error fetching user document: $e");
+        return 'Guest User';
       }
+    } else {
+      print("No user is currently logged in.");
+      return 'Guest User';
     }
-    return 'Guest User';
   }
 
   @override
@@ -98,15 +117,30 @@ class Home extends StatelessWidget {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
                           return const CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return const Text(
+                            "Error loading username",
+                            style: TextStyle(color: Colors.red),
+                          );
+                        } else if (snapshot.hasData) {
+                          return Text(
+                            "Welcome, ${snapshot.data}",
+                            style: TextStyle(
+                              fontSize: fontSize,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.blue,
+                            ),
+                          );
+                        } else {
+                          return Text(
+                            "Welcome, Guest User",
+                            style: TextStyle(
+                              fontSize: fontSize,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.blue,
+                            ),
+                          );
                         }
-                        return Text(
-                          "Welcome, ${snapshot.data ?? 'Guest User'}",
-                          style: TextStyle(
-                            fontSize: fontSize,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.blue,
-                          ),
-                        );
                       },
                     ),
                     const SizedBox(height: 30),
