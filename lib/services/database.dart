@@ -292,6 +292,74 @@ class DatabaseService {
     }
   }
 
+  /// Removes a paper from the user's favorite papers list in Firestore.
+  ///
+  /// If the paper is in the list, it is removed. Otherwise, the function does nothing.
+  ///
+  /// The function returns a Future<void> that resolves when the operation is complete.
+  /// If an error occurs during the operation, the Future is rejected with the error.
+  Future<void> removeFavoritePaper(String paperId) async {
+    try {
+      final userDoc = usersCollection.doc(uid);
+      
+      // Get the current list of favorite papers
+      DocumentSnapshot userSnapshot = await userDoc.get();
+      List<dynamic> favoritePapers = (userSnapshot.data() as Map<String, dynamic>)['favoritePapers'] ?? [];
+      
+      // Remove the paperId if it exists in the list
+      favoritePapers.remove(paperId);
+      
+      // Update the user's document with the new favorite papers list
+      await userDoc.update({
+        'favoritePapers': favoritePapers,
+      });
+    } catch (e) {
+      print("Error removing favorite paper: $e");
+      throw e; // Re-throw to handle in UI
+    }
+  }
+
+  /// Returns a stream of favorite papers for the current user
+  Stream<List<Paper>> streamFavoritePapers() async* {
+    try {
+      // Listen to changes in the user document
+      Stream<DocumentSnapshot> userStream = usersCollection.doc(uid).snapshots();
+      
+      await for (DocumentSnapshot userDoc in userStream) {
+        if (!userDoc.exists) {
+          yield [];
+          continue;
+        }
+
+        final userData = userDoc.data() as Map<String, dynamic>;
+        final List<dynamic> favoritePaperIds = userData['favoritePapers'] ?? [];
+        
+        if (favoritePaperIds.isEmpty) {
+          yield [];
+          continue;
+        }
+
+        // Fetch all papers that are in the favorites list
+        List<Paper> papers = [];
+        for (String paperId in favoritePaperIds) {
+          try {
+            DocumentSnapshot paperDoc = await papersCollection.doc(paperId).get();
+            if (paperDoc.exists) {
+              papers.add(Paper.fromFirestore(paperDoc));
+            }
+          } catch (e) {
+            print('Error fetching paper $paperId: $e');
+          }
+        }
+        
+        yield papers;
+      }
+    } catch (e) {
+      print('Error in streamFavoritePapers: $e');
+      yield [];
+    }
+  }
+
   //* Generic Fetch Method
   Future<List<T>> fetchDocuments<T>(CollectionReference collection,
       T Function(DocumentSnapshot doc) fromFirestore) async {

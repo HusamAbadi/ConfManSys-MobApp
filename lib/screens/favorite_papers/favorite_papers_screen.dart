@@ -26,52 +26,79 @@ class FavoritePapersScreen extends StatelessWidget {
         fontSizeNotifier: fontSizeNotifier,
         showBackButton: true,
       ),
-      body: FutureProvider<List<Paper>?>(
-        create: (context) =>
-            DatabaseService(uid: user?.uid ?? '').fetchFavoritePapers(),
-        initialData: null,
-        child: Column(
-          children: [
-            const SizedBox(height: 50.0),
-            ValueListenableBuilder<double>(
-              valueListenable: fontSizeNotifier,
-              builder: (context, fontSize, _) {
-                return Center(
-                  child: Text(
-                    'Favorite Papers',
-                    style: titleFontStyle.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: fontSize + 4,
+      body: StreamBuilder<List<Paper>>(
+        stream: DatabaseService(uid: user?.uid ?? '').streamFavoritePapers(),
+        builder: (context, snapshot) {
+          return Column(
+            children: [
+              const SizedBox(height: 50.0),
+              ValueListenableBuilder<double>(
+                valueListenable: fontSizeNotifier,
+                builder: (context, fontSize, _) {
+                  return Center(
+                    child: Text(
+                      'Favorite Papers',
+                      style: titleFontStyle.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: fontSize + 4,
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 40.0),
-            Expanded(
-              child: FavoritePapersList(fontSizeNotifier: fontSizeNotifier),
-            ),
-          ],
-        ),
+                  );
+                },
+              ),
+              const SizedBox(height: 40.0),
+              Expanded(
+                child: FavoritePapersList(
+                  papers: snapshot.data,
+                  isLoading: snapshot.connectionState == ConnectionState.waiting,
+                  fontSizeNotifier: fontSizeNotifier,
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 }
 
 class FavoritePapersList extends StatelessWidget {
+  final List<Paper>? papers;
+  final bool isLoading;
   final ValueNotifier<double> fontSizeNotifier;
 
-  const FavoritePapersList({super.key, required this.fontSizeNotifier});
+  const FavoritePapersList({
+    super.key,
+    required this.papers,
+    required this.isLoading,
+    required this.fontSizeNotifier,
+  });
+
+  Future<void> _removePaper(BuildContext context, Paper paper) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final database = DatabaseService(uid: user.uid);
+      await database.removeFavoritePaper(paper.id);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${paper.title} removed from favorites')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to remove paper from favorites')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final papers = Provider.of<List<Paper>?>(context);
-
-    if (papers == null) {
+    if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (papers.isEmpty) {
+    if (papers == null || papers!.isEmpty) {
       return ValueListenableBuilder<double>(
         valueListenable: fontSizeNotifier,
         builder: (context, fontSize, _) {
@@ -85,10 +112,11 @@ class FavoritePapersList extends StatelessWidget {
       );
     }
 
-    papers.sort((a, b) => a.title.compareTo(b.title));
+    final sortedPapers = List<Paper>.from(papers!)
+      ..sort((a, b) => a.title.compareTo(b.title));
 
     return ListView.builder(
-      itemCount: papers.length,
+      itemCount: sortedPapers.length,
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () {
@@ -96,7 +124,7 @@ class FavoritePapersList extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) => PaperDetails(
-                  paper: papers[index],
+                  paper: sortedPapers[index],
                   sessionId: '',
                 ),
               ),
@@ -110,23 +138,35 @@ class FavoritePapersList extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: FutureProvider<List<Person>?>(
                   create: (context) => DatabaseService(uid: 'uid')
-                      .fetchAuthorsByPaper(papers[index].authors),
+                      .fetchAuthorsByPaper(sortedPapers[index].authors),
                   initialData: null,
                   child: FutureProvider<List<Keyword>?>(
                     create: (context) => DatabaseService(uid: 'uid')
-                        .fetchKeywords(papers[index].keywords),
+                        .fetchKeywords(sortedPapers[index].keywords),
                     initialData: null,
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            papers[index].title,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: fontSize,
-                            ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  sortedPapers[index].title,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: fontSize,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => _removePaper(context, sortedPapers[index]),
+                                tooltip: 'Remove from favorites',
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 8.0),
                           Container(
