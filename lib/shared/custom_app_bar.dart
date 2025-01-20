@@ -117,8 +117,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                        content:
-                            Text('Please enter a report before submitting.')),
+                        content: Text(
+                            'Please provide a report description before submitting.')),
                   );
                 }
               },

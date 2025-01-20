@@ -29,6 +29,9 @@ class DatabaseService {
   final CollectionReference personsCollection =
       FirebaseFirestore.instance.collection('persons');
 
+  final CollectionReference reportsCollection =
+      FirebaseFirestore.instance.collection('reports');
+
   //* Streams
 
   Stream<DocumentSnapshot> get users {
@@ -163,23 +166,20 @@ class DatabaseService {
     }
   }
 
-  Future<void> addReport(String report) async {
+  Future<void> addReport(String description) async {
+    final userDoc = usersCollection.doc(uid);
     try {
-      final userDoc = usersCollection
-          .doc(uid); // Assuming 'uid' is the user's unique identifier
-
-      // Get the current list of favorite papers
-      DocumentSnapshot userSnapshot = await userDoc.get();
-      List<dynamic> reports =
-          (userSnapshot.data() as Map<String, dynamic>)['reports'] ?? [];
-
-      reports.add(report);
-
-      await userDoc.update({
-        'reports': reports,
+      // First get the user document
+      final userData = await userDoc.get();
+      await reportsCollection.add({
+        'username': userData.get('username'),
+        'userId': uid,
+        'description': description,
+        'timestamp': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print("Error adding report: $e");
+      print('Error adding report: $e');
+      throw e;
     }
   }
 
