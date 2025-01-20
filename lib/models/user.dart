@@ -18,7 +18,7 @@ factory AppUser.fromFirestore(DocumentSnapshot doc) {
   final data = doc.data() as Map<String, dynamic>;
   return AppUser(
     id: doc.id,
-    username: data['username'] ?? 'Guest User',
+    username: data['username'],
     favoritePapers: List<String>.from(data['favoritePapers'] ?? []),
     reports: List<String>.from(data['reports'] ?? []),
   );

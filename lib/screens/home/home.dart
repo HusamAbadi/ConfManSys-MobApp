@@ -7,6 +7,7 @@ import 'package:conference_management_system/shared/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:conference_management_system/models/user.dart';
 
 class Home extends StatelessWidget {
   Home({super.key});
@@ -23,38 +24,8 @@ class Home extends StatelessWidget {
   ];
 
   final ValueNotifier<double> _fontSizeNotifier = ValueNotifier(16.0);
-  final double _minFontSize = 12.0; // Minimum font size
-  final double _maxFontSize = 30.0; // Optional maximum font size
-
-  Future<String> _getUsername() async {
-    final User? user = _firebaseAuth.currentUser;
-    if (user != null) {
-      print("User is logged in with UID: ${user.uid}");
-      try {
-        final doc = await _firestore.collection('users').doc(user.uid).get();
-        if (doc.exists) {
-          print("User document data: ${doc.data()}");
-          return doc.data()?['username'] ?? 'Guest User';
-        } else {
-          print("User document does not exist in Firestore.");
-          // Optionally, create the document here if it doesn't exist
-          await _firestore.collection('users').doc(user.uid).set({
-            'username': 'Guest User',
-            'favoritePapers': [],
-            'reports': [],
-          });
-          print("Created user document for UID: ${user.uid}");
-          return 'Guest User';
-        }
-      } catch (e) {
-        print("Error fetching user document: $e");
-        return 'Guest User';
-      }
-    } else {
-      print("No user is currently logged in.");
-      return 'Guest User';
-    }
-  }
+  final double _minFontSize = 12.0;
+  final double _maxFontSize = 30.0;
 
   @override
   Widget build(BuildContext context) {
@@ -111,36 +82,23 @@ class Home extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    FutureBuilder<String>(
-                      future: _getUsername(),
+                    StreamBuilder<AppUser?>(
+                      stream: _auth.userStream,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
                           return const CircularProgressIndicator();
-                        } else if (snapshot.hasError) {
-                          return const Text(
-                            "Error loading username",
-                            style: TextStyle(color: Colors.red),
-                          );
-                        } else if (snapshot.hasData) {
-                          return Text(
-                            "Welcome, ${snapshot.data}",
-                            style: TextStyle(
-                              fontSize: fontSize,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.blue,
-                            ),
-                          );
-                        } else {
-                          return Text(
-                            "Welcome, Guest User",
-                            style: TextStyle(
-                              fontSize: fontSize,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.blue,
-                            ),
-                          );
                         }
+
+                        final user = snapshot.data;
+                        return Text(
+                          "Welcome, ${user?.username}",
+                          style: TextStyle(
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.blue,
+                          ),
+                        );
                       },
                     ),
                     const SizedBox(height: 30),
