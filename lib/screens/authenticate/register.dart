@@ -50,17 +50,17 @@ class _RegisterState extends State<Register> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    TextFormField(
-                      decoration: textInputDecoration.copyWith(
-                        labelText: 'Username',
-                        prefixIcon: const Icon(Icons.person_outline),
-                      ),
-                      validator: (val) =>
-                          val!.isEmpty ? 'Enter a username' : null,
-                      onChanged: (val) {
-                        setState(() => username = val);
-                      },
-                    ),
+                    // TextFormField(
+                    //   decoration: textInputDecoration.copyWith(
+                    //     labelText: 'Username',
+                    //     prefixIcon: const Icon(Icons.person_outline),
+                    //   ),
+                    //   validator: (val) =>
+                    //       val!.isEmpty ? 'Enter a username' : null,
+                    //   onChanged: (val) {
+                    //     setState(() => username = val);
+                    //   },
+                    // ),
                     const SizedBox(height: 20.0),
                     TextFormField(
                       decoration: textInputDecoration.copyWith(

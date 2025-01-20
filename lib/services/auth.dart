@@ -6,53 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  AppUser? _userFromFirebaseUser(User? user, {String username = ''}) {
-    return user != null
-        ? AppUser(
-            id: user.uid,
-            username: username, // Use the provided username
-            favoritePapers: [],
-            reports: [],
-          )
-        : null;
-  }
-
-  Stream<AppUser?> get userStream {
-    return _auth.authStateChanges().asyncMap((User? user) async {
-      if (user != null) {
-        try {
-          DocumentSnapshot doc =
-              await _firestore.collection('users').doc(user.uid).get();
-          if (doc.exists) {
-            String username = doc.get('username');
-            return AppUser.fromFirestore(doc);
-          } else {
-            // If the document doesn't exist, create one with default values
-            await _firestore.collection('users').doc(user.uid).set({
-              'username': '',
-              'favoritePapers': [],
-              'reports': [],
-            });
-            return AppUser(
-              id: user.uid,
-              username: '',
-              favoritePapers: [],
-              reports: [],
-            );
-          }
-        } catch (e) {
-          return AppUser(
-            id: user.uid,
-            username: '',
-            favoritePapers: [],
-            reports: [],
-          );
-        }
-      }
-      return null;
-    });
-  }
+  String displayedname = '';
 
   Future<AppUser?> signInWithEmailAndPassword(
       String email, String password) async {
@@ -88,9 +42,12 @@ class AuthService {
 
   Future<AppUser?> registerWithEmailAndPassword(
       String email, String password, String username) async {
+    displayedname = username;
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(
-          email: email, password: password, username: username);
+        email: email,
+        password: password,
+      );
       User? user = result.user;
 
       if (user != null) {
@@ -127,5 +84,44 @@ class AuthService {
     } catch (e) {
       print(e.toString());
     }
+  }
+
+  AppUser? _userFromFirebaseUser(User? user, {String username = ''}) {
+    return user != null
+        ? AppUser(
+            id: user.uid,
+            username: username, // Use the provided username
+            favoritePapers: [],
+            reports: [],
+          )
+        : null;
+  }
+
+  Stream<AppUser?> get userStream {
+    return _auth.authStateChanges().asyncMap((User? user) async {
+      if (user != null) {
+        DocumentSnapshot doc =
+            await _firestore.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+          return AppUser.fromFirestore(doc);
+        } else {
+          // If the document doesn't exist, create one with default values
+          String defaultUsername = user.email?.split('@')[0] ?? 'User';
+          // String defaultUsername = user.displayName ?? 'User';
+          await _firestore.collection('users').doc(user.uid).set({
+            'username': defaultUsername,
+            'favoritePapers': [],
+            'reports': [],
+          });
+          return AppUser(
+            id: user.uid,
+            username: defaultUsername,
+            favoritePapers: [],
+            reports: [],
+          );
+        }
+      }
+      return null;
+    });
   }
 }
